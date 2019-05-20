@@ -1,0 +1,164 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Compras{% endblock %}
+{% block content %}
+    <div class="row">
+        <div class="col-xl-12 order-xl-1">
+            <div class="card bg-secondary shadow">
+                <div class="card-header bg-white border-0">
+                    <div class="row align-items-center">
+                        <div class="col-8">
+                            <h3 class="mb-0">Datos</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="loan_form">
+                        {% csrf_token %}
+                        <h6 class="heading-small text-muted mb-4">Ingrese los siguientes datos</h6>
+                        <div class="pl-lg-4">
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="id_cost">Costo ($)</label>
+                                        <input type="number" name="cost" step="0.01" id="id_cost" class="form-control form-control-alternative" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="id_initial_fee">Pago inicial ($)</label>
+                                        <input type="number" step="0.01" id="id_initial_fee" name="initial_fee" class="form-control form-control-alternative" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="id_taxes">Impuesto (%)</label>
+                                        <input type="number" step="0.01" id="id_taxes" name="taxes" class="form-control form-control-alternative" required>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="id_total_periods">Total periodos</label>
+                                        <input type="number" id="id_total_periods" class="form-control form-control-alternative" name="total_periods">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="id_payment_period">Periodo de Pago</label>
+                                        {{ loan_form.payment_period }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row text-center">
+                                <div class="col-lg-12">
+                                    <input type="submit" class="btn btn-primary text-center" value="Calcular">
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <!-- Table -->
+    <div class="row" id="loan_table">
+        <div class="col">
+            <div class="card shadow">
+                <div class="card-header border-0">
+                    <h3 class="mb-0">Lista de Pagos</h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Cuota Mensual</th>
+                            <th scope="col">Valor Deuda</th>
+                            <th scope="col">Intereses</th>
+                            <th scope="col">Pago Final</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer py-4">
+                    <nav aria-label="...">
+                        <h3 class="text-right mb-0">Pago total: <span class="mb-0" id="total_value"></span></h3>
+                    </nav>
+                    <nav aria-label="...">
+                        <h3 class="text-right mb-0">Total impuestos: <span class="mb-0" id="total_taxes"></span></h3>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% block javascript %}
+        <script type="text/javascript">
+            $(document).on('submit', '#loan_form', function (e) {
+                e.preventDefault();
+                var select = document.getElementById("id_payment_period");
+                var cost = $('#id_cost').val();
+                var initial_fee = $('#id_initial_fee').val();
+                var taxes = $('#id_taxes').val();
+                var total_periods = $('#id_total_periods').val();
+                var payment_period = select.options[select.selectedIndex].value;
+                var period_value = 0.00;
+                var total_value = 0.00;
+                var total_taxes = 0.00;
+                var mensual_cuote = (cost-initial_fee)/total_periods;
+                var table = document.getElementById("loan_table").getElementsByTagName('tbody')[0];
+                while(table.hasChildNodes())
+                {
+                    table.removeChild(table.firstChild);
+                }
+                $.ajax({
+                    type: 'POST',
+                    url: '/loan/get_period_value/',
+                    data:{
+                        payment_period: select.options[select.selectedIndex].value,
+                        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val(),
+                    },
+                    success: function (data) {
+                        period_value = data.data;
+                        for (var i=0; i<=total_periods; i++){
+                            var number = "<td>" + i + "</td>";
+                            if (i==0){
+                                var mensual_cuote_html = "<td>" + roundToTwo(0.00) + "</td>";
+                                var debt_value = (cost-initial_fee);
+                                var tax = (cost-initial_fee)*(taxes/100)*(1/period_value);
+                                var final_value = initial_fee;
+                                var last_tax = tax;
+                            } else{
+                                mensual_cuote_html = "<td>" + roundToTwo(mensual_cuote) + "</td>";
+                                debt_value = debt_value - mensual_cuote;
+                                var tax = debt_value*(taxes/100)*(1/period_value);
+                                final_value = mensual_cuote + last_tax;
+                                last_tax = tax;
+                            }
+                            total_taxes = Number(total_taxes) + Number(tax);
+                            total_value = Number(total_value) + Number(final_value);
+                            var debt_value_html = "<td>" + roundToTwo(debt_value) + "</td>";
+                            var tax_html = "<td>" + roundToTwo(tax) + "</td>";
+                            var final_value_html = "<td>" + roundToTwo(final_value) + "</td>";
+                            var total = number + mensual_cuote_html + debt_value_html + tax_html + final_value_html;
+                            var row = table.insertRow(table.rows.length);
+                            row.innerHTML = total;
+                        }
+                        document.getElementById("total_value").innerHTML = roundToTwo(total_value);
+                        document.getElementById("total_taxes").innerHTML = roundToTwo(total_taxes);
+                    }
+                });
+            });
+            function roundToTwo(num) {
+                return +(Math.round(num + "e+2")  + "e-2");
+            }
+        </script>
+    {% endblock %}
+{% endblock %}

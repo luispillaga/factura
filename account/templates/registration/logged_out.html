@@ -1,0 +1,33 @@
+{% extends 'account/base.html' %}
+{% load static %}
+{% block title %}Cerrar Sesión{% endblock %}
+{% block content %}
+    <div class="container-login100" style="background-image: url('{% static 'account/images/bg-01.jpg' %}');">
+        <div class="wrap-login100 p-l-110 p-r-110 p-t-62 p-b-33">
+            <span class="login100-form-title p-b-53">
+                Cerrar Sesión
+            </span>
+            <div class="w-full text-center p-t-55">
+                <span class="txt2">
+                    Has cerrado sesión exitosamente.
+                </span>
+                <a href="{% url 'login' %}" class="txt2 bo1">
+                    Volver a Iniciar Sesión.
+                </a>
+            </div>
+            <div class="w-full text-center">
+                <span class="txt2">
+                    o
+                </span>
+            </div>
+            <div class="w-full text-center">
+                <span class="txt2">
+                    Regresar al
+                </span>
+                <a href="{% url 'home' %}" class="txt2 bo1">
+                    Menú principal.
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}
