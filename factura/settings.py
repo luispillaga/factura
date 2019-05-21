@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'jet.dashboard',
     'jet',
     'ckeditor',
+    'mathfilters',
     'account.apps.AccountConfig',
     'core.apps.CoreConfig',
     'company.apps.CompanyConfig',

@@ -5,12 +5,25 @@ from company.models import Company
 from loan.models import Loan
 
 
+def increment_invoice_number():
+    last_invoice = Invoice.objects.all().order_by('id').last()
+    if not last_invoice:
+        return 'FAC0001'
+    invoice_no = last_invoice.code
+    invoice_int = int(invoice_no.split('FAC')[-1])
+    width = 4
+    new_invoice_int = invoice_int + 1
+    formatted = (width - len(str(new_invoice_int))) * "0" + str(new_invoice_int)
+    new_invoice_no = 'FAC' + str(formatted)
+    return new_invoice_no
+
+
 class Invoice(models.Model):
     company = models.ForeignKey(Company, verbose_name="Compañia", on_delete=models.PROTECT)
     loan = models.ForeignKey(Loan, verbose_name="Prestamo", on_delete=models.CASCADE)
-    code = models.CharField(verbose_name="Código de Factura", max_length=10, unique=True)
-    purchase_date = models.DateField(verbose_name="Fecha de comppra", default=now)
-    expiration_date = models.DateField(verbose_name="Fecha de comppra", default=now)
+    code = models.CharField(verbose_name="Código de Factura",
+                            max_length=500, default=increment_invoice_number, null=True, blank=True)
+    payment_date = models.DateField(verbose_name="Fecha de pago", default=now)
     subtotal = models.DecimalField(verbose_name="Subtotal", max_digits=10, decimal_places=2)
     tax = models.DecimalField(verbose_name="Iva", max_digits=10, decimal_places=2)
     created = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de creación")

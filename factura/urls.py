@@ -21,7 +21,7 @@ urlpatterns = [
     path('jet/', include('jet.urls', 'jet')),
     path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('account/', include('account.urls')),
-    path('', include('invoice.urls')),
+    path('invoice/', include('invoice.urls')),
     path('loan/', include('loan.urls')),
     path('ckeditor/', include('ckeditor_uploader.urls')),
     path('admin/', admin.site.urls),

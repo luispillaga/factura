@@ -110,12 +110,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {% if request.path == '/loan/' %}active{% endif %}" href="{% url 'loan_create' %}">
-                    <i class="ni ni-bag-17 text-primary"></i> Iniciar compra
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {% if request.path == '/loan/list/' %}active{% endif %}" href="{% url 'loan_list' %}">
+                <a class="nav-link {% if request.path|slice:"13" == '/loan/list/' %}active{% endif %}" href="{% url 'loan_list' %}">
                     <i class="ni ni-bag-17 text-primary"></i> Prestamos - Compras
                 </a>
             </li>

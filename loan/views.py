@@ -3,9 +3,13 @@ from django.http import HttpResponse, JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
+
+from invoice.models import Invoice, DetailInvoice
 from loan.forms import LoanForm, LoanCreateForm
 from loan.models import PaymentPeriod, Loan
 from django.views.generic import CreateView, ListView
+from datetime import datetime, date, time, timedelta
+import calendar
 
 
 def loan(request):
@@ -28,6 +32,10 @@ class LoanList(ListView):
     context_object_name = 'loans'
 
 
+def get_expiration_date(purchase_date, total_period, period):
+    return purchase_date + timedelta(days=((360 / int(period.value)) * total_period))
+
+
 class LoanCreate(CreateView):
     model = Loan
     template_name = "loan/loan_create.html"
@@ -42,29 +50,46 @@ class LoanCreate(CreateView):
         form = self.form_class(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            loan = form.save(commit=False)
-            period = cd['total_periods']
-            # for i in period:
-                # new_invoice =
+            my_loan = form.save()
+            total_period = cd['total_periods']
+            period = cd['payment_period']
+            cost = cd['cost']
+            initial_fee = cd['initial_fee']
+            taxes = cd['taxes']
+            debt = (cost-initial_fee)
+            my_loan.expiration_date = get_expiration_date(cd['date'], total_period, period)
+            my_loan.save()
+            initial_invoice = Invoice(
+                company=request.user.company,
+                loan=my_loan,
+                payment_date=cd['date'],
+                subtotal=initial_fee,
+                tax=0,
+            )
+            initial_invoice.save()
+            initial_detail_invoice = DetailInvoice(
+                invoice=initial_invoice,
+                description="Pago inicial",
+                value=initial_fee,
+            )
+            initial_detail_invoice.save()
+            for i in range(int(total_period)):
+                subtotal = (cost-initial_fee) / total_period
+                tax = debt*(taxes/100)*(1/period.value)
+                new_invoice = Invoice(
+                    company=request.user.company,
+                    loan=my_loan,
+                    payment_date=get_expiration_date(cd['date'], i + 1, period),
+                    subtotal=subtotal,
+                    tax=tax,
+                )
+                new_invoice.save()
+                new_detail_invoice = DetailInvoice(
+                    invoice=new_invoice,
+                    description="Pago por compra",
+                    value=subtotal,
+                )
+                debt = debt - ((cost-initial_fee) / total_period)
+                new_detail_invoice.save()
+                new_invoice.save()
             return HttpResponseRedirect(self.get_success_url())
-
-
-    # if request.method == 'POST':
-    #     form = LoanCreateForm(request.POST)
-    #     if form.is_valid():
-    #         cd = form.cleaned_data
-    #         loan = form.save(commit=False)
-    #         user = authenticate(request,
-    #                             username=cd['username'],
-    #                             password=cd['password'])
-    #         if user is not None:
-    #             if user.is_active:
-    #                 login(request, user)
-    #                 return HttpResponse('Autenticado')
-    #             else:
-    #                 return HttpResponse('Disable')
-    #         else:
-    #             return HttpResponse('Invalid login')
-    # else:
-    #     form = LoanCreateForm()
-    # return render(request, 'loan/create_loan.html', {'loan_form': form})

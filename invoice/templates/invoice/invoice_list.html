@@ -1,6 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
-{% block title %}Préstamos-Compras{% endblock %}
+{% block title %}Lista Facturas{% endblock %}
+{% load mathfilters %}
 {% block content %}
     <!-- Table -->
     <div class="row" id="loan_table">
@@ -9,11 +10,11 @@
                 <div class="card-header border-0">
                     <div class="row align-items-center">
                         <div class="col">
-                            <h3 class="mb-0">Lista de Préstamos o Compras</h3>
+                            <h3 class="mb-0">Facturas</h3>
                         </div>
-                        <div class="col text-right">
-                            <a href="{% url 'loan_create' %}" class="btn btn-sm btn-primary">Crear Préstamo</a>
-                        </div>
+{#                        <div class="col text-right">#}
+{#                            <a href="{% url 'loan_create' %}" class="btn btn-sm btn-primary">Crear Préstamo</a>#}
+{#                        </div>#}
                     </div>
                 </div>
                 <div class="table-responsive">
@@ -21,47 +22,35 @@
                     <table class="table align-items-center table-flush">
                         <thead class="thead-light">
                         <tr>
+                            <th scope="col">Código</th>
                             <th scope="col">Cliente</th>
-                            <th scope="col">Costo</th>
-                            <th scope="col">Cuota inicial</th>
-                            <th scope="col">Fecha de compra</th>
-                            <th scope="col">Fecha de vencimiento</th>
-                            <th scope="col">Periodo de pago</th>
-                            <th scope="col">Estado</th>
+                            <th scope="col">Fecha de pago</th>
+                            <th scope="col">Subtotal</th>
+                            <th scope="col">Iva</th>
+                            <th scope="col">Total</th>
                             <th scope="col"></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {% for loan in loans %}
+                        {% for invoice in invoices %}
                             <tr>
                                 <td scope="row">
-                                    {{ loan.customer.name }}
+                                    {{ invoice.code }}
                                 </td>
                                 <td scope="row">
-                                    ${{ loan.cost }}
+                                    {{ invoice.loan.customer.name }}
                                 </td>
                                 <td scope="row">
-                                    ${{ loan.initial_fee }}
+                                    {{ invoice.payment_date }}
                                 </td>
                                 <td scope="row">
-                                    {{ loan.date }}
+                                    ${{ invoice.subtotal }}
                                 </td>
                                 <td scope="row">
-                                    {{ loan.expiration_date }}
+                                    ${{ invoice.tax }}
                                 </td>
                                 <td scope="row">
-                                    {{ loan.payment_period.name }}
-                                </td>
-                                <td scope="row">
-                                    {% if loan.status == "paying" %}
-                                        <span class="badge badge-dot mr-4">
-                                        <i class="bg-warning"></i> Por Pagar
-                                    </span>
-                                    {% else %}
-                                        <span class="badge badge-dot">
-                                        <i class="bg-success"></i> Cancelado
-                                    </span>
-                                    {% endif %}
+                                    {{ invoice.subtotal | addition:invoice.tax }}
                                 </td>
                                 <td class="text-right">
                                     <div class="dropdown">
@@ -69,7 +58,8 @@
                                             <i class="fas fa-ellipsis-v"></i>
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow" x-placement="bottom-end" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(32px, 32px, 0px);">
-                                            <a class="dropdown-item" href="{% url 'invoice_list' loan.id %}">Ver facturas</a>
+                                            <a class="dropdown-item" href="#">Ver mi factura</a>
+                                            <a class="dropdown-item" href="#">Descargar Factura</a>
                                         </div>
                                     </div>
                                 </td>
