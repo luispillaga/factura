@@ -6,7 +6,7 @@ from invoice.models import Invoice, DetailInvoice
 
 @admin.register(Invoice)
 class InvoiceAdmin(admin.ModelAdmin):
-    list_display = ('code', 'company', 'loan', 'payment_date', 'subtotal', 'tax')
+    list_display = ('code', 'loan', 'payment_date', 'subtotal', 'tax')
 
 
 @admin.register(DetailInvoice)

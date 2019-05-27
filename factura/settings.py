@@ -25,7 +25,7 @@ SECRET_KEY = 'ptp&w$24v@##s^s)z4bi_gfl6#fc^9kjvd5p15b6m%3a=-jbio'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['mysite.com', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'jet.dashboard',
     'jet',
     'ckeditor',
+    'social_django',
     'mathfilters',
     'account.apps.AccountConfig',
     'core.apps.CoreConfig',
@@ -75,6 +76,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends', # add this
+                'social_django.context_processors.login_redirect', # add this
             ],
         },
     },
@@ -111,6 +114,18 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+#add this
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.linkedin.LinkedinOAuth2',
+    'social_core.backends.instagram.InstagramOAuth2',
+    'social_core.backends.facebook.FacebookOAuth2',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+SOCIAL_AUTH_FACEBOOK_KEY = '594618981031160'
+SOCIAL_AUTH_FACEBOOK_SECRET = '4d3d1a4fe35bfdd3983bb20804e18fde'
+SOCIAL_AUTH_FACEBOOK_SCOPE = ['email']
 
 
 # Internationalization

@@ -31,9 +31,21 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ('first_name', 'last_name', 'email')
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'last_name': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'email': forms.EmailInput(attrs={'class':'form-control form-control-alternative'}),
+        }
 
 
 class CompanyEditForm(forms.ModelForm):
     class Meta:
         model = Company
-        fields = ('name', 'address', 'phone', 'city')
+        fields = ('name', 'address', 'phone', 'city', 'logo')
+        widgets = {
+            'name': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'address': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'phone': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'city': forms.TextInput(attrs={'class':'form-control form-control-alternative'}),
+            'logo': forms.FileInput(attrs={'class':'form-control form-control-alternative'}),
+        }

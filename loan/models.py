@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils.timezone import now
 
+from company.models import Company
 from customer.models import Customer
 
 
@@ -21,6 +22,7 @@ class Loan(models.Model):
         ('paying', 'Por Pagar'),
         ('cancelled', 'Cancelado'),
     )
+    company = models.ForeignKey(Company, verbose_name="Compañia", on_delete=models.PROTECT, blank=True, null=True)
     customer = models.ForeignKey(Customer, verbose_name="Cliente", on_delete=models.CASCADE, blank=True, null=True)
     payment_period = models.ForeignKey(PaymentPeriod, verbose_name="Periodo de pago", on_delete=models.PROTECT)
     cost = models.DecimalField(verbose_name="Costo", max_digits=10, decimal_places=2)
@@ -36,7 +38,7 @@ class Loan(models.Model):
     class Meta:
         verbose_name = "Prestamo"
         verbose_name_plural = "Prestamos"
-        ordering = ['-created']
+        ordering = ['created']
 
     def __str__(self):
         return self.customer.name

@@ -19,7 +19,6 @@ def increment_invoice_number():
 
 
 class Invoice(models.Model):
-    company = models.ForeignKey(Company, verbose_name="Compañia", on_delete=models.PROTECT)
     loan = models.ForeignKey(Loan, verbose_name="Prestamo", on_delete=models.CASCADE)
     code = models.CharField(verbose_name="Código de Factura",
                             max_length=500, default=increment_invoice_number, null=True, blank=True)
@@ -35,7 +34,7 @@ class Invoice(models.Model):
         ordering = ['-created']
 
     def __str__(self):
-        return self.company.name
+        return self.loan.customer.name
 
 
 class DetailInvoice(models.Model):

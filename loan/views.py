@@ -6,12 +6,14 @@ from django.views.decorators.http import require_POST
 
 from invoice.models import Invoice, DetailInvoice
 from loan.forms import LoanForm, LoanCreateForm
+from . import forms
 from loan.models import PaymentPeriod, Loan
 from django.views.generic import CreateView, ListView
 from datetime import datetime, date, time, timedelta
 import calendar
 
 
+@login_required
 def loan(request):
     loan_form = LoanForm()
     return render(request, 'loan/loan.html', {'loan_form': loan_form})
@@ -30,6 +32,9 @@ class LoanList(ListView):
     model = Loan
     template_name = 'loan/loan_list.html'
     context_object_name = 'loans'
+
+    def get_queryset(self):
+        return Loan.objects.filter(company=self.request.user.company)
 
 
 def get_expiration_date(purchase_date, total_period, period):
@@ -57,10 +62,10 @@ class LoanCreate(CreateView):
             initial_fee = cd['initial_fee']
             taxes = cd['taxes']
             debt = (cost-initial_fee)
+            my_loan.company = request.user.company
             my_loan.expiration_date = get_expiration_date(cd['date'], total_period, period)
             my_loan.save()
             initial_invoice = Invoice(
-                company=request.user.company,
                 loan=my_loan,
                 payment_date=cd['date'],
                 subtotal=initial_fee,
@@ -77,7 +82,6 @@ class LoanCreate(CreateView):
                 subtotal = (cost-initial_fee) / total_period
                 tax = debt*(taxes/100)*(1/period.value)
                 new_invoice = Invoice(
-                    company=request.user.company,
                     loan=my_loan,
                     payment_date=get_expiration_date(cd['date'], i + 1, period),
                     subtotal=subtotal,

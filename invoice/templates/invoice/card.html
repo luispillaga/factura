@@ -1,0 +1,151 @@
+{% extends 'core/base.html' %}
+{% load static %}
+{% block title %}Lista Facturas{% endblock %}
+{% load mathfilters %}
+{% block content %}
+    <div class="row">
+        <div class="col-lg-12 mt-5">
+            <div class="card">
+                <div class="card-body">
+                    <div class="invoice-area">
+                        <div class="invoice-head">
+                            <div class="row">
+                                <div class="iv-left col-6">
+                                    <span>FACTURA</span>
+                                </div>
+                                <div class="iv-right col-6 text-md-right">
+                                    <span>{{ invoice.code }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Email:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.company.user.email }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Fecha de compra:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.date }}</h5>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Ciudad:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.company.city }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Dirección:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.company.address }}</h5>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Teléfono:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.company.phone }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Fecha de vencimiento:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.expiration_date }}</h5>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Cliente:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.customer.name }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Cédula:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.customer.id_card }}</h5>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Empresa:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.customer.company }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Dirección:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.customer.address }}, {{ invoice.loan.customer.city }}</h5>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Teléfono:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.loan.customer.phone }}</h5>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h4>Fecha pago:</h4>
+                            </div>
+                            <div class="col-lg-3 col-md-3 col-sm-6">
+                                <h5>{{ invoice.payment_date }}</h5>
+                            </div>
+                        </div>
+                        <div class="invoice-table table-responsive mt-5">
+                            <table class="table table-bordered table-hover text-right">
+                                <thead>
+                                <tr class="text-capitalize">
+                                    <th class="text-center" style="width: 5%;">id</th>
+                                    <th class="text-left" style="width: 45%; min-width: 130px;">descripción</th>
+                                    <th>cantidad</th>
+                                    <th style="min-width: 100px">Valor del pago</th>
+                                    <th>total</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for invoice_detail in invoice_details %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td class="text-left">{{ invoice_detail.description }}</td>
+                                        <td>1</td>
+                                        <td>${{ invoice_detail.value }}</td>
+                                        <td>${{ invoice_detail.value }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                <tr>
+                                    <td colspan="4">Subtotal:</td>
+                                    <td>${{ invoice.subtotal }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="3">Impuesto sobre las ventas:</td>
+                                    <td>{{ percentage }}%</td>
+                                    <td>${{ invoice.tax }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4">Total:</td>
+                                    <td>${{ invoice.subtotal | addition:invoice.tax }}</td>
+                                </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
